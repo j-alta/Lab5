@@ -6,24 +6,77 @@ date: "2023-03-19"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(haven)
+install.packages("rdrobust")
+library(rdrobust)
+library(lmtest)
+df = read_dta("probation.dta")
+view(df)
+summary(df)
 ```
 
-## R Markdown
+***Question 1***
+We don't want to  all students who are on probation with all students who are not on probation to evaluate this University’s program because we are trying evaluate the potential causal impact of the probation policy on educational outcomes. To do so, we are employing a regression discontuinity design that examines educational outcomes of students who did and did not receive probation but are otherwise roughly the same in other characteristics. This requires us to only look at observations right around (ie, right above and below) the cutoff of the 1.60 GPA threshold that triggers a student receiving academic probation.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+***Question 2***
+The running variable is the student's GPA. The cutoff is whether that GPA is below or above 1.6
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r q3}
 
-```{r cars}
-summary(cars)
+
+#Question 3
+
+
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+
+```{r}
+
+#q1 first create the distnace from the GPA cutoff
+df$gpa_cutoff = df$GPA - 1.6
+df_narrow = df |> filter(gpa_cutoff > 1.2 & gpa_cutoff <1.2)
+
+rdplot(x = df_narrow$hsgrade_pct,
+       y = df_narrow$gradin4,
+       c = 0,
+       p = 1 
+       x.label = "GPA Cutoff",
+       y = "Age at Freshman Year"
+       
+       
+       #plot a histogram for thsi cutoff
+       #here we would like to udnerstand wherehter there is bunching at the cutoff or if there is a jump in the # of students or just about the same
+       
+       
+       ggplot(data = df_narrow, aes(x = GPA, y= ..density..))+
+         geom_histogram(bins = 400)+
+         geom_vline(xintercept = 1.6, color = 'red')
+       
+      #now do for the centered cutoff
+       ggplot(df_narrow, aes(x = gpa_cutoff, y = ..density..))+
+         geom_histogram(bins = 400) + geom_vline(xintercept = 0)
+       
+       
+       #question 4
+       prediction2 = reg2$coefficients[1] + reg2$coeffienceits[2]*1.6
+       
+       #question 7
+       df_narrow$cutoff = ifelse(dfnarrow$gpa >= 1.6, 1, 0 )
+       ilai_reg = lm(grain4 ~ cutoff +gpa_cutoff + cutoff*gpa_cutoff, data = df_narrow
+                     coeftest(ilai_reg, vcov = vcovHC(ilai_reg, type = "HC1"))
+                     
+                     df_narrow$cutoff = ifelse(df_narrow$gpa > 1.6, 1, 0)
+                     reg3 = lm(gradin4 ~ cutoff + gpa_cutoff + cutoff*gpa_cutoff, data = df_narrow)
+                     coeftest(reg3, vcov = vcovHC(Reg3, type = "HC1")) 
+       
+       
+
+
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
