@@ -1,0 +1,22 @@
+---
+title: "Lab_5"
+output: pdf_document
+date: "2023-03-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("rdrobust")
+library(tidyverse)
+library(haven)
+library(rdrobust)
+library(lmtest)
+library(sandwich)
+df = read_dta("probation.dta")
+view(df)
+summary(df)
+```
+
+
+
+

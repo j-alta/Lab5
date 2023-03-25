@@ -5,12 +5,12 @@ date: "2023-03-19"
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+install.packages("rdrobust")
 library(tidyverse)
 library(haven)
-install.packages("rdrobust")
 library(rdrobust)
 library(lmtest)
+library(sandwich)
 df = read_dta("probation.dta")
 view(df)
 summary(df)
@@ -20,63 +20,55 @@ summary(df)
 We don't want to  all students who are on probation with all students who are not on probation to evaluate this University’s program because we are trying evaluate the potential causal impact of the probation policy on educational outcomes. To do so, we are employing a regression discontuinity design that examines educational outcomes of students who did and did not receive probation but are otherwise roughly the same in other characteristics. This requires us to only look at observations right around (ie, right above and below) the cutoff of the 1.60 GPA threshold that triggers a student receiving academic probation.
 
 ***Question 2***
-The running variable is the student's GPA. The cutoff is whether that GPA is below or above 1.6
+The running variable is the student's GPA. The cutoff is whether that GPA is below or above 1.6.
 
 ```{r q3}
 
+#Question 3: Binned scatter plots and histograms for 2-3 predetermined characteristics compared with GPA cutoff 
 
-#Question 3
+#Create GPA cutoff variable and filtered dataset
+df <- df |> 
+      mutate(gpa_cutoff = GPA - 1.6)
+
+df_narrow = df |> 
+            filter(gpa_cutoff <= 1.2 & gpa_cutoff >= -1.2)
+view(df_narrow)
+
+#Binned scatterplot for high school grade percentile
+binned1 <- rdplot(x = df$gpa_cutoff, #outcome variable
+                  y = df$hsgrade_pct, #running variable
+                  c = 0,
+                  nbins = c(20, 20),
+                  binselect = "es",
+                  x.label = "Grade Point Average minus 1.6", 
+                  y.label = "High School Grade Percentile",
+                  title = "High School Grade Percentile versus GPA Cutoff")
+binned1
 
 
+#Binned scatterplot for age at entry 
+binned2 <- rdplot(x = df$gpa_cutoff, #outcome variable
+                  y = df$age_at_entry,
+                  c = 0,
+                  nbins = c(20, 20),
+                  binselect = "es",
+                  x.label = "Grade Point Average minus 1.6", 
+                  y.label = "College Age at Entry",
+                  title = "College Age at Entry versus GPA Cutoff" )
+binned2
 
-```
+#Histograms to check for a spike in density near threshold 
 
-
-
-
-
-```{r}
-
-#q1 first create the distnace from the GPA cutoff
-df$gpa_cutoff = df$GPA - 1.6
-df_narrow = df |> filter(gpa_cutoff > 1.2 & gpa_cutoff <1.2)
-
-rdplot(x = df_narrow$hsgrade_pct,
-       y = df_narrow$gradin4,
-       c = 0,
-       p = 1 
-       x.label = "GPA Cutoff",
-       y = "Age at Freshman Year"
-       
-       
-       #plot a histogram for thsi cutoff
-       #here we would like to udnerstand wherehter there is bunching at the cutoff or if there is a jump in the # of students or just about the same
-       
-       
-       ggplot(data = df_narrow, aes(x = GPA, y= ..density..))+
-         geom_histogram(bins = 400)+
+histo <- ggplot(data = df_narrow, aes(x = GPA, y= ..density..)) +
+         geom_histogram(bins = 400) +
          geom_vline(xintercept = 1.6, color = 'red')
        
-      #now do for the centered cutoff
-       ggplot(df_narrow, aes(x = gpa_cutoff, y = ..density..))+
-         geom_histogram(bins = 400) + geom_vline(xintercept = 0)
-       
-       
-       #question 4
-       prediction2 = reg2$coefficients[1] + reg2$coeffienceits[2]*1.6
-       
-       #question 7
-       df_narrow$cutoff = ifelse(dfnarrow$gpa >= 1.6, 1, 0 )
-       ilai_reg = lm(grain4 ~ cutoff +gpa_cutoff + cutoff*gpa_cutoff, data = df_narrow
-                     coeftest(ilai_reg, vcov = vcovHC(ilai_reg, type = "HC1"))
-                     
-                     df_narrow$cutoff = ifelse(df_narrow$gpa > 1.6, 1, 0)
-                     reg3 = lm(gradin4 ~ cutoff + gpa_cutoff + cutoff*gpa_cutoff, data = df_narrow)
-                     coeftest(reg3, vcov = vcovHC(Reg3, type = "HC1")) 
-       
-       
+histocenter <- ggplot(df_narrow, aes(x = gpa_cutoff, y = ..density..))+
+               geom_histogram(bins = 400) + geom_vline(xintercept = 0)
 
-
+#There doesn't appear to be a spike in density along the cutoff, and predetermined characteristics appear to be similar on either side of the threshold. 
 
 ```
+
+
 

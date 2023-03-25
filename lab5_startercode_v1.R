@@ -77,7 +77,40 @@ coeftest(linear, vcov = vcovHC(linear, type="HC1"))
 
 #Coefficient of interest is coefficient on above = indicator for being above probation threshold
 
-
+rdplot(x = df_narrow$hsgrade_pct,
+       y = df_narrow$gradin4,
+       c = 0,
+       p = 1 
+       x.label = "GPA Cutoff",
+       y = "Age at Freshman Year"
+       
+       
+       #plot a histogram for thsi cutoff
+       #here we would like to udnerstand wherehter there is bunching at the cutoff or if there is a jump in the # of students or just about the same
+       
+       
+       ggplot(data = df_narrow, aes(x = GPA, y= ..density..))+
+         geom_histogram(bins = 400)+
+         geom_vline(xintercept = 1.6, color = 'red')
+       
+       #now do for the centered cutoff
+       ggplot(df_narrow, aes(x = gpa_cutoff, y = ..density..))+
+         geom_histogram(bins = 400) + geom_vline(xintercept = 0)
+       
+       
+       #question 4
+       prediction2 = reg2$coefficients[1] + reg2$coeffienceits[2]*1.6
+       
+       #question 7
+       df_narrow$cutoff = ifelse(dfnarrow$gpa >= 1.6, 1, 0 )
+       ilai_reg = lm(grain4 ~ cutoff +gpa_cutoff + cutoff*gpa_cutoff, data = df_narrow
+                     coeftest(ilai_reg, vcov = vcovHC(ilai_reg, type = "HC1"))
+                     
+                     df_narrow$cutoff = ifelse(df_narrow$gpa > 1.6, 1, 0)
+                     reg3 = lm(gradin4 ~ cutoff + gpa_cutoff + cutoff*gpa_cutoff, data = df_narrow)
+                     coeftest(reg3, vcov = vcovHC(Reg3, type = "HC1")) 
+                     
+                     
 
 
 
